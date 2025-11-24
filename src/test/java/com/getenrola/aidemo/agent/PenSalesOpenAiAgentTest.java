@@ -102,8 +102,54 @@ class PenSalesOpenAiAgentTest {
                         "here’s your link",
                         "i can send you the link",
                         "purchase",
-                        "grab one here",
                         "valid for");
     }
 
+    // Test: Agent should keep messages short and natural, not too long.
+    @Test
+    void testSmsStyleLength() {
+        var req = new AgentRequest("Tell me about the pen", null, chatModel);
+        System.out.println("SMS Style Test → " + req.userText());
+
+        var agentReply = penSalesOpenAiAgent.execute(req);
+        assertThat(agentReply.text().length()).isLessThan(350);
+    }
+
+    @Test
+    void testObjectionHandling() {
+        AgentRequest req = new AgentRequest("Seems expensive!", null, chatModel);
+        var reply = penSalesOpenAiAgent.execute(req);
+
+        System.out.println("Objection Handling Test → " + reply.text());
+
+        assertThat(reply.text().toLowerCase())
+                .containsAnyOf(
+                        "i get that",
+                        "totally fair",
+                        "understand",
+                        "makes sense",
+                        "reason why"
+                );
+    }
+
+    // Tiny test to score the agent's response
+    @Test
+    void testLightweightScoringEval() {
+        AgentRequest req = new AgentRequest("I'm not sure if it's worth the price", null, chatModel);
+        var reply = penSalesOpenAiAgent.execute(req);
+
+        String text = reply.text().toLowerCase();
+        int score = 0;
+
+        if (text.contains("understand") || text.contains("get that")) score++;   // acknowledges objection
+        if (text.contains("titanium") || text.contains("diamonds") || text.contains("premium")) score++; // mentions value
+        if (text.length() < 350) score++; // sms-style clarity
+
+        System.out.println("Lightweight Eval Score: " + score);
+        System.out.println("Reply: " + reply.text());
+
+        assertThat(score)
+                .as("Agent should score at least 2/3")
+                .isGreaterThanOrEqualTo(2);
+    }
 }
