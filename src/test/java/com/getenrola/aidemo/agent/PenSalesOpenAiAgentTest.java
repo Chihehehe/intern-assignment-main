@@ -9,44 +9,101 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PenSalesOpenAiAgentTest {
 
     private final PenSalesOpenAiAgent penSalesOpenAiAgent = new PenSalesOpenAiAgent();
-
+    String chatModel = ChatModel.GPT_3_5_TURBO.asString();
 
     @Test
     void testScript() {
-        String chatModel = ChatModel.GPT_3_5_TURBO.asString();
-        String previousResponseId = null;
-        var agentRequest = new AgentRequest("Hi, my name is Fred", previousResponseId, chatModel);
-        System.out.println("User: " + agentRequest.userText());
-        var agentReply = penSalesOpenAiAgent.execute(agentRequest);
+        var req = new AgentRequest("Hi, my name is Fred", null, chatModel);
+        System.out.println("User: " + req.userText());
+
+        var agentReply = penSalesOpenAiAgent.execute(req);
         System.out.println("Agent: " + agentReply.text());
+
         assertThat(agentReply.responseId()).isNotNull();
         assertThat(agentReply.text()).isNotNull();
-        previousResponseId = agentReply.responseId();
+    }
 
-        agentRequest = new AgentRequest("How much is the pen?", previousResponseId, chatModel);
-        System.out.println("User: " + agentRequest.userText());
-        agentReply = penSalesOpenAiAgent.execute(agentRequest);
-        System.out.println("Agent: " + agentReply.text());
-        assertThat(agentReply.responseId()).isNotNull();
-        assertThat(agentReply.text()).isNotNull();
-        previousResponseId = agentReply.responseId();
+    @Test
+    void testDiscoveryStep() {
+        var req = new AgentRequest("Hi", null, chatModel);
+        System.out.println("User: " + req.userText());
 
-        agentRequest = new AgentRequest("Seems expensive!", previousResponseId, chatModel);
-        System.out.println("User: " + agentRequest.userText());
-        agentReply = penSalesOpenAiAgent.execute(agentRequest);
-        System.out.println("Agent: " + agentReply.text());
-        assertThat(agentReply.responseId()).isNotNull();
-        assertThat(agentReply.text()).isNotNull();
-        previousResponseId = agentReply.responseId();
+        var agentReply = penSalesOpenAiAgent.execute(req);
+        System.out.println("Discovery Test -> " + agentReply.text());
 
-        agentRequest = new AgentRequest("Can you email me a brochure?", previousResponseId, chatModel);
-        System.out.println("User: " + agentRequest.userText());
-        agentReply = penSalesOpenAiAgent.execute(agentRequest);
-        System.out.println("Agent: " + agentReply.text());
-        assertThat(agentReply.responseId()).isNotNull();
-        assertThat(agentReply.text()).isNotNull();
-        previousResponseId = agentReply.responseId();
+        assertThat(agentReply.text().toLowerCase())
+                .containsAnyOf(
+                        "use a pen",
+                        "what do you usually",
+                        "what do you use a pen for",
+                        "tell me what you need it for");
+    }
 
+    @Test
+    void testPresentationStep() {
+        var req = new AgentRequest("How much is the pen?", null, chatModel);
+        System.out.println("User: " + req.userText());
+
+        var agentReply = penSalesOpenAiAgent.execute(req);
+        System.out.println("Presentation Test -> " + agentReply.text());
+
+        assertThat(agentReply.text().toLowerCase())
+                .containsAnyOf(
+                        "5000",
+                        "titanium",
+                        "diamonds",
+                        "black ink",
+                        "premium");
+    }
+
+    @Test
+    void testTemperatureCheckStep() {
+        var req = new AgentRequest("Okay sounds good?", null, chatModel);
+        System.out.println("User: " + req.userText());
+
+        var agentReply = penSalesOpenAiAgent.execute(req);
+        System.out.println("Temperature Check -> " + agentReply.text());
+
+        assertThat(agentReply.text().toLowerCase())
+                .containsAnyOf(
+                        "how does that sound",
+                        "anything you'd like to know",
+                        "are you interested",
+                        "does that work for you",
+                        "questions about it");
+    }
+
+    @Test
+    void testCommitmentStep() {
+        var req = new AgentRequest("No more questions", null, chatModel);
+        System.out.println("User: " + req.userText());
+
+        var agentReply = penSalesOpenAiAgent.execute(req);
+        System.out.println("Commitment Step-> " + agentReply.text());
+
+        assertThat(agentReply.text().toLowerCase())
+                .containsAnyOf(
+                        "would you like me to",
+                        "should i send you the link",
+                        "ready to move forward",
+                        "keen to grab one");
+    }
+
+    @Test
+    void testActionStep() {
+        var req = new AgentRequest("Yes send link", null, chatModel);
+        System.out.println("User: " + req.userText());
+
+        var agentReply = penSalesOpenAiAgent.execute(req);
+        System.out.println("Action Step -> " + agentReply.text());
+
+        assertThat(agentReply.text().toLowerCase())
+                .containsAnyOf(
+                        "here’s your link",
+                        "i can send you the link",
+                        "purchase",
+                        "grab one here",
+                        "valid for");
     }
 
 }
