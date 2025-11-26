@@ -1,135 +1,171 @@
 # 🖊️ AI Demo Assignment — “Sell a Pen”
 
-## Overview
+## What I Built
 
-This project is a short technical assignment designed to test your ability to **design, build, and evaluate an AI agent** using the OpenAI API and Java (Spring Boot).  
-The goal is to implement a simple **AI Sales Agent** that can hold an SMS-style conversation with a potential customer and “sell a pen.”
+I built an AI sales agent that sells a luxury pen through SMS-style conversations. The agent follows a 5-step sales process:
 
-The project includes a minimal starter setup with a working agent and console interface.  
-You are free to modify, extend, or refactor as you like.
+1. **Discovery** - Asks what the customer uses a pen for
+2. **Presentation** - Shows pen features and links them to the customer's needs
+3. **Temperature Check** - Asks "how does that sound?" to gauge interest
+4. **Commitment** - Acknowledges excitement and asks if they have questions
+5. **Action** - Offers the purchase link when ready
 
----
+The agent can also handle objections (like "too expensive") using a structured approach: acknowledge, reframe, reconfirm, check readiness, and transition back to the sale.
 
-## 🎯 Your Task
+## Why I Made These Design Choices
 
-Build and improve an **AI Agent** that sells a pen.
+### 1. **Combined Presentation and Temperature Check**
+I put the temperature check ("how does that sound?") right after presenting features. This makes the conversation flow more naturally - instead of waiting for the customer to respond before checking interest, we ask immediately. It feels more like a real conversation.
 
-### Minimum requirements
-- **Engineer and implement a prompt** that follows the sales process described below.
-- **Implement a basic test or evaluation** to measure how well your agent performs with different conversation inputs.
+### 2. **Strict Step Separation**
+I made very clear rules about which phrases belong to which step. This prevents the agent from mixing steps (like asking discovery questions during the commitment phase). Each step has specific phrases it must use, and it can't use phrases from other steps.
 
-### Extra-credit ideas (optional)
-If you’re feeling ambitious, consider adding or writing a plan for:
-- ✅ **Structured output** — e.g. text output + lead interest classification + sales stage.
-- ✅ **A lightweight eval framework** — test different prompts, models, or temperatures, or use AI to score outputs.
-- ✅ **Tool/function use** — call a local function for product details.
-- ✅ **Spring AI integration** — refactor to use [Spring AI](https://spring.io/projects/spring-ai).
-- ✅ **Conversation Memory** — is there a different way to manage conversation memory? What are the advantages/disadvantages of the different approaches?
-- ✅ **Few-Shot** — can few-shot prompting be implemented and how does it improve performance?
+### 3. **Linking Features to Customer Needs**
+When the customer says they need the pen for "signing" or "writing", the agent explains why the pen is perfect for that specific use case. This makes the sales pitch more personal and relevant, not just a list of features.
 
-You don’t have to do any of these, but they’ll help us see how you think about applied AI.
+### 4. **Concise Prompt**
+I kept the system prompt as short as possible while still being clear. This helps avoid hitting the context window limit when conversations get long. I removed repetitive instructions and combined similar rules.
 
----
+### 5. **Objection Handling Flow**
+After handling objections, if the customer shows positive interest (like saying "nice"), the agent moves directly to offering the link. It doesn't ask "any questions?" again because we already went through that phase. This prevents the conversation from going in circles.
 
-## 🧠 The Scenario
-
-Your AI agent is a **sales representative** for a company that sells pens.  
-It’s chatting with a **lead** (the potential buyer) via SMS-style messages — so keep messages short and natural.
-
-The goal is to follow a realistic **five-step sales process:**
-
-1. **Discovery** – Ask questions to understand the lead’s motivations.
-2. **Presentation** – Link product features to what matters to the lead.
-3. **Temperature Check** – Gauge the lead’s interest; invite questions.
-4. **Commitment** – Move toward a purchase decision.
-5. **Action** – Close the sale with a clear next step.
-
-### Example conversation
-
-```
-User: Hi
-Agent: Hey there! I hear you're looking for a new pen. What do you usually use a pen for?
-User: I want something nice for signing contracts.
-Agent: Got it. You need a pen that feels great and looks impressive. Our Signature Black Gel Pen fits that perfectly — smooth ink, classy design. How does that sound?
-User: Sounds good.
-Agent: Excellent. It sounds like you are pretty keen on our pen. Is there anything else you'd like to know about it?
-User: No.
-Agent: Awesome. Would you like me to send you a link to grab one?
-User: Sure.
-Agent: Great! Here’s your link: https://bit.ly/fakepen. It’s valid for 4 hours. Let me know if you have any questions.
-```
-
-Objection handling is an important part of the sales process — it’s how the agent helps the lead move past uncertainty without being pushy.
-
-Objects are best handled with the following process:
-
-* Acknowledge the concern – show understanding (“Totally fair,” “I get that,” “That’s a good question”).
-
-* Reframe or clarify – address the reason behind the objection (“The price is higher because it’s refillable and lasts years.”).
-
-* Reconfirm value – link back to what the user said matters most to them (“You mentioned you want something that feels professional — this one’s designed for exactly that.”).
-
-* Check readiness – lightly test if the objection is resolved (“Does that sound more reasonable now?”).
-
-* Transition smoothly – move back to the sales flow or closing step (“If it feels like the right fit, I can send you the link.”).
-
----
-
-## 💻 Tech Setup
-
-This project is built with **Java + Spring Boot** and uses the [OpenAI Java SDK](https://github.com/openai/openai-java).
+## How to Run and Test Your Agent
 
 ### Prerequisites
-- A **GitHub account**
-- **Java IDE** (we recommend IntelliJ IDEA)
-- **OpenAI API key** (you’ll be given one, budgeted at ~$20 USD for this project)
+- Java 24 (check with `java -version`)
+- OpenAI API key
+- Maven (included as `mvnw` wrapper)
 
----
+### Setup
 
-## ▶️ How to Run
+1. **Set your OpenAI API key:**
+   ```bash
+   export OPENAI_API_KEY=your_api_key_here
+   ```
 
+   On Windows PowerShell:
+   ```powershell
+   $env:OPENAI_API_KEY="your_api_key_here"
+   ```
+
+2. **Run the application:**
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+
+   On Windows:
+   ```bash
+   .\mvnw.cmd spring-boot:run
+   ```
+
+3. **Chat with the agent:**
+   - Type your messages and press Enter
+   - Type `exit` or `quit` to stop
+
+### Running Tests
+
+Run all tests:
 ```bash
-export OPENAI_API_KEY=<<YOUR_OPENAI_API_KEY>>
-./mvnw spring-boot:run
+./mvnw test
 ```
 
-This starts the console app. You can then chat directly with your AI agent.
-
-To run the included test:
-
+Run a specific test:
 ```bash
-export OPENAI_API_KEY=<<YOUR_OPENAI_API_KEY>>
 ./mvnw -Dtest=PenSalesOpenAiAgentTest test
 ```
 
-If you are running using IntelliJ (not the command line), then you'll want to add that OPENAI_API_KEY as an environment variable in your run configuration.
+The test file includes 9 test cases that check:
+- Discovery step (asks about pen usage)
+- Presentation step (mentions price/features)
+- Temperature check step (uses interest-checking phrases)
+- Commitment step (moves toward purchase)
+- Action step (provides link)
+- SMS-style length (keeps messages under 350 characters)
+- Objection handling (acknowledges concerns)
+- Lightweight scoring (evaluates response quality)
 
----
+### Example Conversation
 
-## 🧩 Project Structure
+```
+You: hi
+Agent: What do you usually use a pen for?
 
-| File                           | Description                                                                                     |
-|--------------------------------|-------------------------------------------------------------------------------------------------|
-| `PenSalesOpenAiAgent.java`     | Core logic for your AI agent. This is where you’ll spend most of your time.                     |
-| `PenSalesOpenAiAgentTest.java` | A simple “eval” test. Extend this to test multiple prompts, models, or outcomes.                |
-| `ConsoleChat.java`             | Lets you interact with the agent from the command line. You can leave this as-is or improve it. |
+You: signing
+Agent: This pen is perfect for signing with its premium black ink and elegant titanium case encrusted with diamonds. It's priced at $5000. How does that sound to you?
 
----
+You: nice
+Agent: Looks like you're excited about our pen! Do you have any questions?
 
-## 🚀 What to Submit
+You: how much
+Agent: This exclusive pen is priced at $5000, reflecting its exceptional craftsmanship, titanium case, diamonds, and premium black ink. Any other questions?
 
-1. Push your completed project to **your own public GitHub repo**.
-2. Re-write this README to describe:
-    - What you built
-    - Why you made your design choices
-    - How to run and test your agent
-    - Anything else you think we should know
-3. Email us with a link to your repo.
+You: no
+Agent: Would you like me to send you the link?
 
----
+You: yes
+Agent: Here's your link to purchase...
+```
 
-## 💡 Tips
+## Anything Else You Should Know
 
-- Be creative — the task is small, but we’re looking for **clear thinking and applied AI ability**, not fancy frameworks.
-- Use AI tools to help you write your code if you want (we do that too!).
-- If you add structured output, evals, or tool use — keep it simple and explain your reasoning clearly.
+### Conversation Memory (Context Window Limitation)
+If conversations get very long, the model eventually hits its context limit. I tried two ideas for handling memory:
+
+1. **Use `previousResponseId` (current setup).** Easiest option—let OpenAI track the chat for me. When the thread gets too long I just reset `previousResponseId` and start fresh. Fast to build, but the agent forgets everything once it resets.
+2. **Keep a short local buffer.** I could store the last few user/agent messages in memory and resend them every time. That would keep some context after a reset, but it requires more code and token management. I skipped it for now to keep things simple.
+3. **Persist history in MySQL.** In a previous RAG project I built a full MySQL chat-history service (users, sessions, messages). It’s great for multi-user apps, but it felt like overkill here, so I mentioned it only as future work.
+
+All work; I stuck with option 1 because it covered the assignment without extra overhead.
+
+### The Pen Details
+- Price: $5000
+- Features: Titanium case, encrusted with diamonds, black ink
+- It's a luxury, one-of-a-kind pen
+
+### Project Structure
+- `PenSalesOpenAiAgent.java` - The main agent with the system prompt and API calls
+- `PenSalesOpenAiAgentTest.java` - Test cases to verify the agent works correctly
+- `ConsoleChat.java` - Simple console interface for chatting with the agent
+
+### What I Learned
+Building this helped me understand:
+- How to structure prompts for consistent behavior
+- The importance of clear step separation in sales processes
+- How to handle edge cases (objections, questions, context limits)
+- Balancing prompt detail with context window constraints
+
+The key challenge was getting the agent to follow the exact steps without mixing them up. It took several iterations to get the prompt right, but now the agent reliably follows the sales process!
+
+### Structured Output
+Each agent reply now contains:
+1. A customer-facing SMS line (<=3 sentences).
+2. A metadata line like `Stage: Presentation; Interest: warm`.
+Both lines are visible in the console so I can inspect behavior, but in a real UI we'd only show the SMS line and log the metadata for analytics.
+
+### Local Tool Use
+I also added a small helper method called ProductInfo.getLuxuryPenDetails().
+The idea is really straightforward: before the agent replies, it checks this method to get the latest pen information — like the price, ink type, body material, and extra features.
+
+This makes things a lot easier because I can change the product details in one place, and I don’t have to edit the whole prompt every time.
+If the price changes or I want to add a new feature, I just update the helper method and the agent will automatically use the new info in its responses.
+
+### Few-Shot Prompting (Plan)
+I’m also thinking about adding a few example conversations directly into the prompt. Instead of only giving instructions, I would include 3–5 short samples, like:
+
+- User says "Hi" → Agent asks about pen usage (Discovery step)
+- User says "signing" → Agent presents features linked to signing (Presentation step)
+- User says "too expensive" → Agent handles objection properly
+
+**How it would improve performance:**
+- Models learn better when they can see real examples.
+- It gives the agent a clear pattern to follow, so responses are more consistent.
+- Even if the instructions are confusing, the examples show the model exactly how it should act.
+
+Right now I'm using instruction-based prompting, but adding few-shot examples would likely make the agent more reliable and closer to the desired behavior.
+
+### Lightweight Eval Framework (Plan)
+One thing I'd like to add next is a tiny evaluation system:
+- I would send a list of preset user messages into the agent, and test how it responds when I change the prompt, model, or temperature.
+- For each reply, I'd use another AI call score things like stage accuracy, tone, and objection handling.
+- I'd save all the scores and notes so I can compare different versions and see when the agent gets better or worse.
+

@@ -26,6 +26,10 @@ public class PenSalesOpenAiAgent {
                 .role(ResponseInputItem.Message.Role.SYSTEM)
                 .build()));
         inputs.add(ResponseInputItem.ofMessage(ResponseInputItem.Message.builder()
+                .addInputTextContent("Product reference:\n" + ProductInfo.getLuxuryPenDetails())
+                .role(ResponseInputItem.Message.Role.SYSTEM)
+                .build()));
+        inputs.add(ResponseInputItem.ofMessage(ResponseInputItem.Message.builder()
                 .addInputTextContent(agentRequest.userText())
                 .role(ResponseInputItem.Message.Role.USER)
                 .build()));
@@ -54,11 +58,17 @@ public class PenSalesOpenAiAgent {
 
             You are chatting with a customer via SMS.
             Your messages must be short, natural, friendly, and no more than 3 sentences. 
-            
+
+            STRUCTURED OUTPUT FORMAT (always):
+            - Line 1: Your SMS reply (<=3 sentences).
+            - Line 2: Metadata in this exact format -> Stage: <Discovery|Presentation|Temperature|Commitment|Action|Objection>; Interest: <cold|warm|hot>.
+              Example metadata line: Stage: Presentation; Interest: warm
+            Always keep the metadata line aligned with the step you are currently on.
+
             You MUST follow this 5-step sales process in order. Determine which step based on the customer's message:
             
             1. Discovery - When customer greets you or starts conversation (e.g., "Hi", "Hello").
-               Ask ONLY about their pen usage needs. MUST use one of this phrases like: "what do you usually use a pen for", "what do you use a pen for", "tell me what you need it for", or "what do you usually" (referring to pen usage).
+               Ask ONLY 1 question about their pen usage needs. MUST use one of this phrases like: "what do you usually use a pen for", "what do you use a pen for", "tell me what you need it for", or "what do you usually" (referring to pen usage).
                DO NOT ask about pen usage in other steps.
             
             2. Presentation - Move to this step when:
